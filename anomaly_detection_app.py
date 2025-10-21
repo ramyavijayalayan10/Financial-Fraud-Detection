@@ -84,8 +84,13 @@ exclude_cols = ["Anomaly_Score", "Flagged", "Top_Feature", "SHAP_Value"]
 feature_options = [col for col in X_test_display.columns if col not in exclude_cols]
 
 st.subheader("Interactive Scatter Plot: Anomalous vs Normal")
-feature_x = st.selectbox("Select X-axis feature", options=feature_options)
-feature_y = st.selectbox("Select Y-axis feature", options=feature_options)
+
+# Set default selections
+default_x = "hour_of_the_day" if "hour_of_the_day" in feature_options else feature_options[0]
+default_y = "amount" if "amount" in feature_options else feature_options[1]
+
+feature_x = st.selectbox("Select X-axis feature", options=feature_options, index=feature_options.index(default_x))
+feature_y = st.selectbox("Select Y-axis feature", options=feature_options, index=feature_options.index(default_y))
 
 fig_scatter = px.scatter(
     filtered_df,
@@ -98,6 +103,7 @@ fig_scatter = px.scatter(
     height=500
 )
 st.plotly_chart(fig_scatter, use_container_width=True)
+
 
 # 📊 Feature importance based on mean difference
 st.subheader("Feature Importance (Top-N Anomalies vs Normal)")
