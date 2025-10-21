@@ -6,11 +6,15 @@ import shap
 import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit_shap as st_shap
-from sklearn.metrics import precision_recall_curve, roc_curve, auc
+from sklearn.metrics import precision_recall_curve, roc_curve, auc, recall_score
 from pyod.models.iforest import IForest
 from pyod.models.knn import KNN
 from pyod.models.lof import LOF
 
+
+def anomaly_recall(y_true, y_pred):
+    return recall_score(y_test, y_pred)
+    
 
 # Load model and data
 model = joblib.load("models/iforest_model.pkl")
