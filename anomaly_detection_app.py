@@ -119,6 +119,7 @@ plt.title("ROC Curve")
 plt.legend()
 st.pyplot(fig_roc)
 
+"""
 # SHAP explanations
 if st.checkbox("Show SHAP explanations"):
     st.subheader("SHAP Feature Importance")
@@ -146,3 +147,4 @@ if st.checkbox("Show SHAP explanations"):
 
     st.subheader("Top-N Anomalies with SHAP Insights")
     st.dataframe(X_test_display.loc[top_indices, ["Flagged", "Anomaly_Score", "Top_Feature", "SHAP_Value"] + feature_options])
+""" 
