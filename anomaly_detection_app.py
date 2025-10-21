@@ -61,16 +61,36 @@ st.download_button(
     mime="text/csv"
 )
 
-# Anomaly score distribution
-st.subheader("Anomaly Score Distribution")
-fig_score = plt.figure(figsize=(8, 5))
-plt.hist(scores, bins=50, color="skyblue", edgecolor="black")
-plt.axvline(scores[top_indices[0]], color="red", linestyle="--", label="Top-N Cutoff")
-plt.xlabel("Anomaly Score")
-plt.ylabel("Frequency")
-plt.title("Distribution of Anomaly Scores")
-plt.legend()
-st.pyplot(fig_score)
+# Pie chart: Anomaly distribution by type
+st.subheader("Anomaly Distribution by Transaction Type")
+pie_data = filtered_df[filtered_df["Flagged"] == 1]["type"].value_counts().reset_index()
+pie_data.columns = ["Transaction Type", "Count"]
+
+fig_pie = px.pie(
+    pie_data,
+    names="Transaction Type",
+    values="Count",
+    title="Anomalies by Transaction Type",
+    height=500
+)
+st.plotly_chart(fig_pie, use_container_width=True)
+
+# Interactive scatter plot
+st.subheader("Interactive Scatter Plot: Anomalous vs Normal")
+feature_x = st.selectbox("Select X-axis feature", options=feature_options)
+feature_y = st.selectbox("Select Y-axis feature", options=feature_options)
+
+fig_scatter = px.scatter(
+    filtered_df,
+    x=feature_x,
+    y=feature_y,
+    color=filtered_df["Flagged"].map({0: "Normal", 1: "Anomalous"}),
+    color_discrete_map={"Normal": "blue", "Anomalous": "red"},
+    hover_data=["Anomaly_Score", "type", "step"],
+    title="Anomalous vs Normal Transactions",
+    height=500
+)
+st.plotly_chart(fig_scatter, use_container_width=True)
 
 # Feature importance based on mean difference
 exclude_cols = ["Anomaly_Score", "Flagged", "Top_Feature", "SHAP_Value"]
@@ -98,23 +118,6 @@ fig_feat = px.bar(
 )
 st.plotly_chart(fig_feat, use_container_width=True)
 
-# Interactive scatter plot
-st.subheader("Interactive Scatter Plot: Anomalous vs Normal")
-feature_x = st.selectbox("Select X-axis feature", options=feature_options)
-feature_y = st.selectbox("Select Y-axis feature", options=feature_options)
-
-fig_scatter = px.scatter(
-    filtered_df,
-    x=feature_x,
-    y=feature_y,
-    color=filtered_df["Flagged"].map({0: "Normal", 1: "Anomalous"}),
-    color_discrete_map={"Normal": "blue", "Anomalous": "red"},
-    hover_data=["Anomaly_Score", "type", "step"],
-    title="Anomalous vs Normal Transactions",
-    height=500
-)
-st.plotly_chart(fig_scatter, use_container_width=True)
-
 # Fraud trend over time
 st.subheader("Fraud Trends Over Time")
 trend_data = filtered_df.groupby("step")["Flagged"].sum().reset_index()
@@ -128,16 +131,20 @@ fig_trend = px.line(
 )
 st.plotly_chart(fig_trend, use_container_width=True)
 
-# Pie chart: Anomaly distribution by type
-st.subheader("Anomaly Distribution by Transaction Type")
-pie_data = filtered_df[filtered_df["Flagged"] == 1]["type"].value_counts().reset_index()
-pie_data.columns = ["Transaction Type", "Count"]
+# Anomaly score distribution
+st.subheader("Anomaly Score Distribution")
+fig_score = plt.figure(figsize=(8, 5))
+plt.hist(scores, bins=50, color="skyblue", edgecolor="black")
+plt.axvline(scores[top_indices[0]], color="red", linestyle="--", label="Top-N Cutoff")
+plt.xlabel("Anomaly Score")
+plt.ylabel("Frequency")
+plt.title("Distribution of Anomaly Scores")
+plt.legend()
+st.pyplot(fig_score)
 
-fig_pie = px.pie(
-    pie_data,
-    names="Transaction Type",
-    values="Count",
-    title="Anomalies by Transaction Type",
-    height=500
-)
-st.plotly_chart(fig_pie, use_container_width=True)
+
+
+
+
+
+
