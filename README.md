@@ -100,7 +100,8 @@ streamlit run anomaly_detection_app.py
 ---
 ## 🔐 License
 
-This project is licensed under the [MIT License](LICENSE).  
-You’re free to use, modify, and distribute it with proper attribution.
+
+This project is licensed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License.  
+View full terms in [LICENSE.md](LICENSE.md) or [here](https://creativecommons.org/licenses/by-nc-nd/4.0/)
 
 ---
