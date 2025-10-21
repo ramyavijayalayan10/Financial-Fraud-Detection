@@ -2,11 +2,9 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import joblib
-import shap
 import matplotlib.pyplot as plt
 import seaborn as sns
-import streamlit_shap as st_shap
-import sklearn
+import plotly.express as px
 from sklearn.metrics import precision_recall_curve, roc_curve, auc, recall_score
 from pyod.models.iforest import IForest
 
@@ -50,6 +48,9 @@ filtered_df = X_test_display[
 
 # Main dashboard
 st.title("💳 Financial Fraud Detection Dashboard")
+st.metric("Total Transactions (Filtered)", len(filtered_df))
+st.metric("Flagged Anomalies", filtered_df["Flagged"].sum())
+
 st.subheader(f"Top {top_n} Flagged Transactions (Filtered)")
 top_anomalies = filtered_df[filtered_df["Flagged"] == 1].sort_values(by="Anomaly_Score", ascending=False)
 st.dataframe(top_anomalies)
@@ -72,20 +73,39 @@ plt.title("Distribution of Anomaly Scores")
 plt.legend()
 st.pyplot(fig_score)
 
-# Scatter plot
-st.subheader("Scatter Plot: Anomalous vs Non-Anomalous")
+# Feature importance based on mean difference
 exclude_cols = ["Anomaly_Score", "Flagged", "Top_Feature", "SHAP_Value"]
 feature_options = [col for col in X_test_display.columns if col not in exclude_cols]
+
+st.subheader("Feature Importance (Top-N Anomalies vs Normal)")
+feature_importance = {}
+for feature in feature_options:
+    mean_flagged = X_test_display.loc[top_indices, feature].mean()
+    mean_normal = X_test_display.loc[X_test_display["Flagged"] == 0, feature].mean()
+    feature_importance[feature] = abs(mean_flagged - mean_normal)
+
+importance_df = pd.DataFrame({
+    "Feature": list(feature_importance.keys()),
+    "Mean Difference": list(feature_importance.values())
+}).sort_values(by="Mean Difference", ascending=False)
+
+fig_feat = px.bar(importance_df, x="Feature", y="Mean Difference", title="Top Features Differentiating Anomalies")
+st.plotly_chart(fig_feat, use_container_width=True)
+
+# Interactive scatter plot
+st.subheader("Interactive Scatter Plot: Anomalous vs Non-Anomalous")
 feature_x = st.selectbox("Select X-axis feature", options=feature_options)
 feature_y = st.selectbox("Select Y-axis feature", options=feature_options)
 
-fig_scatter, ax = plt.subplots()
-colors = filtered_df["Flagged"].map({0: "gray", 1: "red"})
-ax.scatter(filtered_df[feature_x], filtered_df[feature_y], c=colors, alpha=0.6)
-ax.set_xlabel(feature_x)
-ax.set_ylabel(feature_y)
-ax.set_title("Anomalous vs Non-Anomalous Transactions")
-st.pyplot(fig_scatter)
+fig_scatter = px.scatter(
+    filtered_df,
+    x=feature_x,
+    y=feature_y,
+    color=filtered_df["Flagged"].map({0: "Normal", 1: "Anomalous"}),
+    hover_data=["Anomaly_Score", "type", "step"],
+    title="Anomalous vs Non-Anomalous Transactions"
+)
+st.plotly_chart(fig_scatter, use_container_width=True)
 
 # Fraud trend over time
 st.subheader("Fraud Trends Over Time")
@@ -118,49 +138,3 @@ plt.ylabel("True Positive Rate")
 plt.title("ROC Curve")
 plt.legend()
 st.pyplot(fig_roc)
-
-# SHAP explanations
-if st.checkbox("Show SHAP explanations"):
-    st.subheader("SHAP Feature Importance")
-
-    # Extract raw IsolationForest from PyOD + GridSearchCV
-    raw_iforest = model.best_estimator_.detector_
-
-    @st.cache_data
-    def compute_shap_values():
-        # Use SHAP TreeExplainer for fast computation
-        explainer = shap.TreeExplainer(raw_iforest)
-        shap_values = explainer.shap_values(X_test_scaled[top_indices])
-        return explainer, shap_values
-
-    with st.spinner("Computing SHAP values..."):
-        explainer, shap_values = compute_shap_values()
-
-    st.success("SHAP values computed!")
-
-    # SHAP summary bar plot
-    fig_summary = plt.figure()
-    shap.summary_plot(shap_values, X_test_scaled[top_indices], plot_type="bar", show=False)
-    st.pyplot(fig_summary)
-
-    # SHAP force plot for individual transaction
-    st.subheader("SHAP Force Plot for Individual Transaction")
-    row_index = st.selectbox("Select transaction index", options=top_indices)
-
-    try:
-        idx_local = np.where(top_indices == row_index)[0][0]
-        st_shap.force_plot(explainer.expected_value, shap_values[idx_local], X_test_scaled[row_index])
-    except Exception as e:
-        st.error(f"Could not generate force plot: {e}")
-
-    # Extract top contributing feature for each flagged anomaly
-    top_features = [X_test_display.columns[np.argmax(np.abs(shap_values[i]))] for i in range(len(top_indices))]
-    top_feature_values = [shap_values[i][np.argmax(np.abs(shap_values[i]))] for i in range(len(top_indices))]
-
-    # Add SHAP insights to display DataFrame
-    X_test_display.loc[top_indices, "Top_Feature"] = top_features
-    X_test_display.loc[top_indices, "SHAP_Value"] = top_feature_values
-
-    # Display enriched anomaly table
-    st.subheader("Top-N Anomalies with SHAP Insights")
-    st.dataframe(X_test_display.loc[top_indices, ["Flagged", "Anomaly_Score", "Top_Feature", "SHAP_Value"] + feature_options])
