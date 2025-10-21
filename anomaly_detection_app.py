@@ -76,16 +76,7 @@ fig_pie = px.pie(
 )
 st.plotly_chart(fig_pie, use_container_width=True)
 
-# 📈 Anomaly score distribution
-st.subheader("Anomaly Score Distribution")
-fig_score = plt.figure(figsize=(8, 5))
-plt.hist(scores, bins=50, color="skyblue", edgecolor="black")
-plt.axvline(scores[top_indices[0]], color="red", linestyle="--", label="Top-N Cutoff")
-plt.xlabel("Anomaly Score")
-plt.ylabel("Frequency")
-plt.title("Distribution of Anomaly Scores")
-plt.legend()
-st.pyplot(fig_score)
+
 
 # 🎯 Interactive scatter plot
 exclude_cols = ["Anomaly_Score", "Flagged", "Top_Feature", "SHAP_Value"]
@@ -142,3 +133,14 @@ fig_trend = px.line(
     height=500
 )
 st.plotly_chart(fig_trend, use_container_width=True)
+
+# 📈 Anomaly score distribution
+st.subheader("Anomaly Score Distribution")
+fig_score = plt.figure(figsize=(7, 4))
+plt.hist(scores, bins=50, color="skyblue", edgecolor="black")
+plt.axvline(scores[top_indices[0]], color="red", linestyle="--", label="Top-N Cutoff")
+plt.xlabel("Anomaly Score")
+plt.ylabel("Frequency")
+plt.title("Distribution of Anomaly Scores")
+plt.legend()
+st.pyplot(fig_score)
