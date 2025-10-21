@@ -51,7 +51,7 @@ st.title("💳 Financial Fraud Detection Dashboard")
 st.metric("Total Transactions (Filtered)", len(filtered_df))
 st.metric("Flagged Anomalies", filtered_df["Flagged"].sum())
 
-# 📋 Top-N Flagged Transactions Table
+# Top-N Flagged Transactions Table
 st.subheader(f"Top {top_n} Flagged Transactions (Filtered)")
 top_anomalies = filtered_df[filtered_df["Flagged"] == 1].sort_values(by="Anomaly_Score", ascending=False)
 st.dataframe(top_anomalies)
@@ -63,7 +63,7 @@ st.download_button(
     mime="text/csv"
 )
 
-# 🥧 Pie chart: Anomaly distribution by type
+# Pie chart: Anomaly distribution by type
 st.subheader("Anomaly Distribution by Transaction Type")
 pie_data = filtered_df[filtered_df["Flagged"] == 1]["type"].value_counts().reset_index()
 pie_data.columns = ["Transaction Type", "Count"]
@@ -77,7 +77,7 @@ fig_pie = px.pie(
 )
 st.plotly_chart(fig_pie, use_container_width=True)
 
-# 📊 Anomaly Distribution: Weekday vs Weekend
+# Anomaly Distribution: Weekday vs Weekend
 st.subheader("Anomaly Distribution: Weekday vs Weekend")
 weekend_stats = filtered_df[filtered_df["Flagged"] == 1]["is_weekend"].value_counts().reset_index()
 weekend_stats.columns = ["is_weekend", "Anomaly Count"]
@@ -94,7 +94,7 @@ fig_weekend = px.bar(
 )
 st.plotly_chart(fig_weekend, use_container_width=True)
 
-# 📦 Box Plot: Amount Distribution by Day Type
+# Box Plot: Amount Distribution by Day Type
 st.subheader("Amount Distribution of Anomalies: Weekday vs Weekend")
 anomaly_df = filtered_df[filtered_df["Flagged"] == 1].copy()
 anomaly_df["is_weekend"] = anomaly_df["is_weekend"].map({0: "Weekday", 1: "Weekend"})
@@ -109,8 +109,8 @@ fig_amount_box = px.box(
 )
 st.plotly_chart(fig_amount_box, use_container_width=True)
 
-# 🧠 Behavioral Feature Comparison
-st.subheader("Anomalies: Weekday vs Weekend")
+#  Behavioral Feature Comparison
+st.subheader("Anomaly Distribution: Weekday vs Weekend")
 behavioral_means = anomaly_df.groupby("is_weekend")[["account_age", "is_frequent_sender", "is_frequent_receiver"]].mean().reset_index()
 melted = behavioral_means.melt(id_vars="is_weekend", var_name="Feature", value_name="Average")
 
@@ -125,7 +125,7 @@ fig_behavior = px.bar(
 )
 st.plotly_chart(fig_behavior, use_container_width=True)
 
-# 📊 Feature importance based on mean difference
+# Feature importance based on mean difference
 exclude_cols = ["Anomaly_Score", "Flagged", "Top_Feature", "SHAP_Value"]
 feature_options = [col for col in X_test_display.columns if col not in exclude_cols]
 
@@ -151,7 +151,7 @@ fig_feat = px.bar(
 )
 st.plotly_chart(fig_feat, use_container_width=True)
 
-# 📉 Fraud trend over time (only anomalies)
+# Fraud trend over time (only anomalies)
 st.subheader("Fraud Trends Over Time")
 trend_data = filtered_df[filtered_df["Flagged"] == 1].groupby("step")["Flagged"].count().reset_index()
 fig_trend = px.line(
@@ -164,7 +164,7 @@ fig_trend = px.line(
 )
 st.plotly_chart(fig_trend, use_container_width=True)
 
-# 📈 Anomaly score distribution
+# Anomaly score distribution
 sns.set_theme(style="whitegrid")
 st.subheader("Anomaly Score Distribution")
 fig_score = plt.figure(figsize=(7, 4))
@@ -176,7 +176,7 @@ plt.title("Distribution of Anomaly Scores")
 plt.legend()
 st.pyplot(fig_score)
 
-# 🎯 Interactive scatter plot
+# Interactive scatter plot
 st.subheader("Interactive Scatter Plot: Anomalous vs Normal")
 default_x = "hour_of_the_day" if "hour_of_the_day" in feature_options else feature_options[0]
 default_y = "amount" if "amount" in feature_options else feature_options[1]
