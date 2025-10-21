@@ -47,13 +47,17 @@ This app acts as a dashboard that is designed to mimic how fraud analysts work �
 - Avoids arbitrary thresholding and aligns better with real-world workflows where analysts review the riskiest cases first.
 
 ### 📈 Interactive Visualizations
-- **Scatter plots** to compare anomalous vs normal transactions.
-- **Precision-Recall and ROC curves** to evaluate model performance.
-- **Fraud trend over time** to spot spikes and patterns.
 
-### 🧠 SHAP Feature Attribution
-- **Global feature importance** via SHAP summary plots.
-- **Local explanations** for individual transactions using SHAP force plots.
+- **Top-N flagged transactions table** with CSV download for deeper inspection.
+- **Pie chart** showing anomaly distribution by transaction type.
+- **Bar chart** comparing anomaly counts between weekdays and weekends.
+- **Box plot** illustrating transaction amount distribution across day types (weekday vs weekend).
+- **Grouped bar chart** comparing behavioral features like account age and sender/receiver frequency between weekday and weekend anomalies.
+- **Scatter plots** to explore relationships between features and highlight anomalous vs normal transactions.
+- **Feature importance bar chart** showing which features most differentiate anomalies from normal behavior.
+- **Fraud trend over time** (anomalies only) to detect spikes and patterns in suspicious activity.
+- **Histogram** of anomaly scores with cutoff marker, styled using Seaborn for visual consistency.
+
 
 ### 🧾 Filters and Export
 - Filter transactions by type and time window.
@@ -73,7 +77,7 @@ Once the model scores the test data, the top-N transactions are flagged based on
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 ```bash
 fraud_dashboard/
 ├── anomaly_detection_app.py                      # Streamlit app
@@ -94,14 +98,14 @@ fraud_dashboard/
 ```
 ---
 
-## 📦 Installation
+##  Installation
 
 ```bash
 pip install -r requirements.txt
 streamlit run anomaly_detection_app.py
 ```
 ---
-## 🔐 License
+##  License
 
 
 This project is licensed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License.  
