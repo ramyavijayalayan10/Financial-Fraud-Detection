@@ -80,9 +80,11 @@ feature_options = [col for col in X_test_display.columns if col not in exclude_c
 st.subheader("Feature Importance (Top-N Anomalies vs Normal)")
 feature_importance = {}
 for feature in feature_options:
-    mean_flagged = X_test_display.loc[top_indices, feature].mean()
-    mean_normal = X_test_display.loc[X_test_display["Flagged"] == 0, feature].mean()
-    feature_importance[feature] = abs(mean_flagged - mean_normal)
+    if pd.api.types.is_numeric_dtype(X_test_display[feature]):
+        mean_flagged = X_test_display.loc[top_indices, feature].mean()
+        mean_normal = X_test_display.loc[X_test_display["Flagged"] == 0, feature].mean()
+        feature_importance[feature] = abs(mean_flagged - mean_normal)
+
 
 importance_df = pd.DataFrame({
     "Feature": list(feature_importance.keys()),
