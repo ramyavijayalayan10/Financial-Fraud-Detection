@@ -1,4 +1,3 @@
-pip install scikit-learn==1.6.1
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -7,7 +6,7 @@ import shap
 import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit_shap as st_shap
-import scikit-learn as sklearn
+import sklearn
 from sklearn.metrics import precision_recall_curve, roc_curve, auc, recall_score
 from pyod.models.iforest import IForest
 
