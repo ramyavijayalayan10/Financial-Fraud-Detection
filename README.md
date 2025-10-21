@@ -3,7 +3,7 @@
 This project is a Streamlit-powered dashboard for detecting fraudulent financial transactions using an Isolation Forest model. It highlights the top-N most suspicious transactions based on anomaly scores and provides interactive tools for investigation, filtering, and feature attribution.
 
 🔗 **Live App**: [Streamlit Dashboard](https://financial-fraud-detection-x9srwkbaz4uewvzzes7og7.streamlit.app/) 
-📺**Demo**: [Streamlit Dashboard Demo](./demo/Anomaly_Detection_App_Demo.MP4)
+ **Demo**: [Streamlit Dashboard Demo](./demo/Anomaly_Detection_App_Demo.MP4)
 
 
 ---
