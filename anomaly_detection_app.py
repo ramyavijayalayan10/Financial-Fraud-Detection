@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import joblib
 import matplotlib.pyplot as plt
+import seaborn as sns
 import plotly.express as px
 from sklearn.metrics import recall_score
 from pyod.models.iforest import IForest
