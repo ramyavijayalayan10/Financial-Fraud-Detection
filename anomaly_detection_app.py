@@ -124,7 +124,7 @@ if st.checkbox("Show SHAP explanations"):
     st.subheader("SHAP Feature Importance")
 
     # Extract raw IsolationForest from PyOD + GridSearchCV
-    raw_iforest = model.best_estimator_.clf
+    raw_iforest = model.best_estimator_.detector_
 
     @st.cache_data
     def compute_shap_values():
