@@ -10,3 +10,4 @@ streamlit-shap
 pyod
 pyspark
 pyod
+plotly
