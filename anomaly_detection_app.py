@@ -77,35 +77,58 @@ fig_pie = px.pie(
 )
 st.plotly_chart(fig_pie, use_container_width=True)
 
+# 📊 Anomaly Distribution: Weekday vs Weekend
+st.subheader("Anomaly Distribution: Weekday vs Weekend")
+weekend_stats = filtered_df[filtered_df["Flagged"] == 1]["is_weekend"].value_counts().reset_index()
+weekend_stats.columns = ["is_weekend", "Anomaly Count"]
+weekend_stats["is_weekend"] = weekend_stats["is_weekend"].map({0: "Weekday", 1: "Weekend"})
 
+fig_weekend = px.bar(
+    weekend_stats,
+    x="is_weekend",
+    y="Anomaly Count",
+    color="is_weekend",
+    color_discrete_map={"Weekday": "blue", "Weekend": "red"},
+    title="Anomalies by Weekday vs Weekend",
+    height=500
+)
+st.plotly_chart(fig_weekend, use_container_width=True)
 
-# 🎯 Interactive scatter plot
+# 📦 Box Plot: Amount Distribution by Day Type
+st.subheader("Amount Distribution of Anomalies: Weekday vs Weekend")
+anomaly_df = filtered_df[filtered_df["Flagged"] == 1].copy()
+anomaly_df["is_weekend"] = anomaly_df["is_weekend"].map({0: "Weekday", 1: "Weekend"})
+
+fig_amount_box = px.box(
+    anomaly_df,
+    x="is_weekend",
+    y="amount",
+    color="is_weekend",
+    title="Transaction Amounts of Anomalies by Day Type",
+    height=500
+)
+st.plotly_chart(fig_amount_box, use_container_width=True)
+
+# 🧠 Behavioral Feature Comparison
+st.subheader("Behavioral Feature Averages: Weekday vs Weekend (Anomalies Only)")
+behavioral_means = anomaly_df.groupby("is_weekend")[["account_age", "is_frequent_sender", "is_frequent_receiver"]].mean().reset_index()
+melted = behavioral_means.melt(id_vars="is_weekend", var_name="Feature", value_name="Average")
+
+fig_behavior = px.bar(
+    melted,
+    x="Feature",
+    y="Average",
+    color="is_weekend",
+    barmode="group",
+    title="Average Behavioral Features by Day Type (Anomalies)",
+    height=500
+)
+st.plotly_chart(fig_behavior, use_container_width=True)
+
+# 📊 Feature importance based on mean difference
 exclude_cols = ["Anomaly_Score", "Flagged", "Top_Feature", "SHAP_Value"]
 feature_options = [col for col in X_test_display.columns if col not in exclude_cols]
 
-st.subheader("Interactive Scatter Plot: Anomalous vs Normal")
-
-# Set default selections
-default_x = "hour_of_the_day" if "hour_of_the_day" in feature_options else feature_options[0]
-default_y = "amount" if "amount" in feature_options else feature_options[1]
-
-feature_x = st.selectbox("Select X-axis feature", options=feature_options, index=feature_options.index(default_x))
-feature_y = st.selectbox("Select Y-axis feature", options=feature_options, index=feature_options.index(default_y))
-
-fig_scatter = px.scatter(
-    filtered_df,
-    x=feature_x,
-    y=feature_y,
-    color=filtered_df["Flagged"].map({0: "Normal", 1: "Anomalous"}),
-    color_discrete_map={"Normal": "blue", "Anomalous": "red"},
-    hover_data=["Anomaly_Score", "type", "step"],
-    title="Anomalous vs Normal Transactions",
-    height=500
-)
-st.plotly_chart(fig_scatter, use_container_width=True)
-
-
-# 📊 Feature importance based on mean difference
 st.subheader("Feature Importance (Top-N Anomalies vs Normal)")
 feature_importance = {}
 for feature in feature_options:
@@ -128,21 +151,21 @@ fig_feat = px.bar(
 )
 st.plotly_chart(fig_feat, use_container_width=True)
 
-# 📉 Fraud trend over time
+# 📉 Fraud trend over time (only anomalies)
 st.subheader("Fraud Trends Over Time")
-trend_data = filtered_df.groupby("step")["Flagged"].sum().reset_index()
+trend_data = filtered_df[filtered_df["Flagged"] == 1].groupby("step")["Flagged"].count().reset_index()
 fig_trend = px.line(
     trend_data,
     x="step",
     y="Flagged",
     markers=True,
-    title="Fraud Trend Over Time",
+    title="Fraud Trend Over Time (Anomalies Only)",
     height=500
 )
 st.plotly_chart(fig_trend, use_container_width=True)
 
 # 📈 Anomaly score distribution
-sns.set_theme(style="whitegrid") 
+sns.set_theme(style="whitegrid")
 st.subheader("Anomaly Score Distribution")
 fig_score = plt.figure(figsize=(7, 4))
 plt.hist(scores, bins=50, color="skyblue", edgecolor="black")
@@ -152,3 +175,23 @@ plt.ylabel("Frequency")
 plt.title("Distribution of Anomaly Scores")
 plt.legend()
 st.pyplot(fig_score)
+
+# 🎯 Interactive scatter plot
+st.subheader("Interactive Scatter Plot: Anomalous vs Normal")
+default_x = "hour_of_the_day" if "hour_of_the_day" in feature_options else feature_options[0]
+default_y = "amount" if "amount" in feature_options else feature_options[1]
+
+feature_x = st.selectbox("Select X-axis feature", options=feature_options, index=feature_options.index(default_x))
+feature_y = st.selectbox("Select Y-axis feature", options=feature_options, index=feature_options.index(default_y))
+
+fig_scatter = px.scatter(
+    filtered_df,
+    x=feature_x,
+    y=feature_y,
+    color=filtered_df["Flagged"].map({0: "Normal", 1: "Anomalous"}),
+    color_discrete_map={"Normal": "blue", "Anomalous": "red"},
+    hover_data=["Anomaly_Score", "type", "step"],
+    title="Anomalous vs Normal Transactions",
+    height=500
+)
+st.plotly_chart(fig_scatter, use_container_width=True)
