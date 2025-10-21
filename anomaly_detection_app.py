@@ -67,6 +67,24 @@ st.download_button(
     mime="text/csv"
 )
 
+# Sample background data for KernelExplainer
+background = X_train_scaled[np.random.choice(X_train_scaled.shape[0], 100, replace=False)]
+
+# Create SHAP explainer
+explainer = shap.KernelExplainer(model.predict_proba, background)
+
+# Compute SHAP values for test data
+shap_values = explainer.shap_values(X_test_scaled)
+
+if st.checkbox("Show SHAP explanations"):
+    st.write("Generating SHAP values...")
+    shap_values = explainer.shap_values(X_test_scaled)
+    st.write("SHAP values computed!")
+
+    # Visualize
+    st.pyplot(shap.summary_plot(shap_values, X_test_scaled, show=False))
+
+
 # Anomaly score distribution
 st.subheader("Anomaly Score Distribution")
 fig_score = plt.figure()
