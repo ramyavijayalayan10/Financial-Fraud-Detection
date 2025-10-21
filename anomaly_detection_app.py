@@ -50,6 +50,7 @@ st.title("💳 Financial Fraud Detection Dashboard")
 st.metric("Total Transactions (Filtered)", len(filtered_df))
 st.metric("Flagged Anomalies", filtered_df["Flagged"].sum())
 
+# 📋 Top-N Flagged Transactions Table
 st.subheader(f"Top {top_n} Flagged Transactions (Filtered)")
 top_anomalies = filtered_df[filtered_df["Flagged"] == 1].sort_values(by="Anomaly_Score", ascending=False)
 st.dataframe(top_anomalies)
@@ -61,7 +62,7 @@ st.download_button(
     mime="text/csv"
 )
 
-# Pie chart: Anomaly distribution by type
+# 🥧 Pie chart: Anomaly distribution by type
 st.subheader("Anomaly Distribution by Transaction Type")
 pie_data = filtered_df[filtered_df["Flagged"] == 1]["type"].value_counts().reset_index()
 pie_data.columns = ["Transaction Type", "Count"]
@@ -75,7 +76,21 @@ fig_pie = px.pie(
 )
 st.plotly_chart(fig_pie, use_container_width=True)
 
-# Interactive scatter plot
+# 📈 Anomaly score distribution
+st.subheader("Anomaly Score Distribution")
+fig_score = plt.figure(figsize=(8, 5))
+plt.hist(scores, bins=50, color="skyblue", edgecolor="black")
+plt.axvline(scores[top_indices[0]], color="red", linestyle="--", label="Top-N Cutoff")
+plt.xlabel("Anomaly Score")
+plt.ylabel("Frequency")
+plt.title("Distribution of Anomaly Scores")
+plt.legend()
+st.pyplot(fig_score)
+
+# 🎯 Interactive scatter plot
+exclude_cols = ["Anomaly_Score", "Flagged", "Top_Feature", "SHAP_Value"]
+feature_options = [col for col in X_test_display.columns if col not in exclude_cols]
+
 st.subheader("Interactive Scatter Plot: Anomalous vs Normal")
 feature_x = st.selectbox("Select X-axis feature", options=feature_options)
 feature_y = st.selectbox("Select Y-axis feature", options=feature_options)
@@ -92,10 +107,7 @@ fig_scatter = px.scatter(
 )
 st.plotly_chart(fig_scatter, use_container_width=True)
 
-# Feature importance based on mean difference
-exclude_cols = ["Anomaly_Score", "Flagged", "Top_Feature", "SHAP_Value"]
-feature_options = [col for col in X_test_display.columns if col not in exclude_cols]
-
+# 📊 Feature importance based on mean difference
 st.subheader("Feature Importance (Top-N Anomalies vs Normal)")
 feature_importance = {}
 for feature in feature_options:
@@ -118,7 +130,7 @@ fig_feat = px.bar(
 )
 st.plotly_chart(fig_feat, use_container_width=True)
 
-# Fraud trend over time
+# 📉 Fraud trend over time
 st.subheader("Fraud Trends Over Time")
 trend_data = filtered_df.groupby("step")["Flagged"].sum().reset_index()
 fig_trend = px.line(
@@ -130,21 +142,3 @@ fig_trend = px.line(
     height=500
 )
 st.plotly_chart(fig_trend, use_container_width=True)
-
-# Anomaly score distribution
-st.subheader("Anomaly Score Distribution")
-fig_score = plt.figure(figsize=(8, 5))
-plt.hist(scores, bins=50, color="skyblue", edgecolor="black")
-plt.axvline(scores[top_indices[0]], color="red", linestyle="--", label="Top-N Cutoff")
-plt.xlabel("Anomaly Score")
-plt.ylabel("Frequency")
-plt.title("Distribution of Anomaly Scores")
-plt.legend()
-st.pyplot(fig_score)
-
-
-
-
-
-
-
