@@ -110,7 +110,7 @@ fig_amount_box = px.box(
 st.plotly_chart(fig_amount_box, use_container_width=True)
 
 # 🧠 Behavioral Feature Comparison
-st.subheader("Behavioral Feature Averages: Weekday vs Weekend (Anomalies Only)")
+st.subheader("Anomalies: Weekday vs Weekend")
 behavioral_means = anomaly_df.groupby("is_weekend")[["account_age", "is_frequent_sender", "is_frequent_receiver"]].mean().reset_index()
 melted = behavioral_means.melt(id_vars="is_weekend", var_name="Feature", value_name="Average")
 
@@ -159,7 +159,7 @@ fig_trend = px.line(
     x="step",
     y="Flagged",
     markers=True,
-    title="Fraud Trend Over Time (Anomalies Only)",
+    title="Fraud Trend Over Time",
     height=500
 )
 st.plotly_chart(fig_trend, use_container_width=True)
