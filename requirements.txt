@@ -5,7 +5,7 @@ joblib
 shap
 matplotlib
 seaborn
-scikit-learn
+scikit-learn==1.6.1
 streamlit-shap
 pyod
 pyspark
