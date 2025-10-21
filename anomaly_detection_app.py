@@ -119,32 +119,48 @@ plt.title("ROC Curve")
 plt.legend()
 st.pyplot(fig_roc)
 
-"""
 # SHAP explanations
 if st.checkbox("Show SHAP explanations"):
     st.subheader("SHAP Feature Importance")
+
+    # Extract raw IsolationForest from PyOD + GridSearchCV
+    raw_iforest = model.best_estimator_.clf
+
+    @st.cache_data
+    def compute_shap_values():
+        # Use SHAP TreeExplainer for fast computation
+        explainer = shap.TreeExplainer(raw_iforest)
+        shap_values = explainer.shap_values(X_test_scaled[top_indices])
+        return explainer, shap_values
+
     with st.spinner("Computing SHAP values..."):
-        background = X_train_scaled[np.random.choice(X_train_scaled.shape[0], 100, replace=False)]
-        explainer = shap.KernelExplainer(model.decision_function, background)
-        shap_values = explainer.shap_values(X_test_scaled)
+        explainer, shap_values = compute_shap_values()
+
     st.success("SHAP values computed!")
 
+    # SHAP summary bar plot
     fig_summary = plt.figure()
-    shap.summary_plot(shap_values, X_test_scaled, plot_type="bar", show=False)
+    shap.summary_plot(shap_values, X_test_scaled[top_indices], plot_type="bar", show=False)
     st.pyplot(fig_summary)
 
+    # SHAP force plot for individual transaction
     st.subheader("SHAP Force Plot for Individual Transaction")
     row_index = st.selectbox("Select transaction index", options=top_indices)
+
     try:
-        st_shap.force_plot(explainer.expected_value, shap_values[row_index], X_test_scaled[row_index])
+        idx_local = np.where(top_indices == row_index)[0][0]
+        st_shap.force_plot(explainer.expected_value, shap_values[idx_local], X_test_scaled[row_index])
     except Exception as e:
         st.error(f"Could not generate force plot: {e}")
 
-    top_features = [X_test_display.columns[np.argmax(np.abs(shap_values[i]))] for i in top_indices]
-    top_feature_values = [shap_values[i][np.argmax(np.abs(shap_values[i]))] for i in top_indices]
+    # Extract top contributing feature for each flagged anomaly
+    top_features = [X_test_display.columns[np.argmax(np.abs(shap_values[i]))] for i in range(len(top_indices))]
+    top_feature_values = [shap_values[i][np.argmax(np.abs(shap_values[i]))] for i in range(len(top_indices))]
+
+    # Add SHAP insights to display DataFrame
     X_test_display.loc[top_indices, "Top_Feature"] = top_features
     X_test_display.loc[top_indices, "SHAP_Value"] = top_feature_values
 
+    # Display enriched anomaly table
     st.subheader("Top-N Anomalies with SHAP Insights")
     st.dataframe(X_test_display.loc[top_indices, ["Flagged", "Anomaly_Score", "Top_Feature", "SHAP_Value"] + feature_options])
-""" 
