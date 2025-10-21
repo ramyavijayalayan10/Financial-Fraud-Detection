@@ -135,6 +135,7 @@ fig_trend = px.line(
 st.plotly_chart(fig_trend, use_container_width=True)
 
 # 📈 Anomaly score distribution
+sns.set_theme(style="whitegrid") 
 st.subheader("Anomaly Score Distribution")
 fig_score = plt.figure(figsize=(7, 4))
 plt.hist(scores, bins=50, color="skyblue", edgecolor="black")
